@@ -49,7 +49,7 @@ def findCircles(img, r):
 	imgray=cv2.Canny(dilation,30,100)#Canny边缘检测算子
 
 	circles = cv2.HoughCircles(imgray,method=cv2.HOUGH_GRADIENT,dp=1,minDist=80,param1=100,param2=20,minRadius=r-5,maxRadius=r+5)#霍夫圆变换
-	if circles == None:
+	if circles is None:
 		print("No circles found.")
 		return [[]]
 	#第3参数默认为1
@@ -58,6 +58,7 @@ def findCircles(img, r):
 	#第6参数根据圆大小设置(圆越小设置越小，检测的圆越多，但检测大圆会有噪点)
 	#第7圆最小半径
 	#第8圆最大半径
+
 	circles = np.uint16(np.around(circles))
 	#np.uint16数组转换为16位，0-65535
 	#np.around返回四舍五入后的值
@@ -101,13 +102,8 @@ for i in P:
 	cropImg = img[i[1]-i[2]:i[1]+i[2],i[0]-i[2]:i[0]+i[2]]
 	cv2.imwrite(str(count)+".jpg",cropImg)
 	count+=1
-	for j in [imgray, img]:
-		# 画出外圆
-		cv2.circle(j,(i[0],i[1]),i[2],(255, 255, 255),2)#第二参数（）内是圆心坐标，第三参数是半径，第四参数（）内是颜色，第五参数是线条粗细
-		# 画出圆心
-		# cv2.circle(j,(i[0],i[1]),2,(0,0,0),3)
-print("圆的个数是：")
-print(len(P))
+
+print("圆的个数是：",len(P))
 for i in P:
 	r=int(i[2])
 	x=int(i[0])
