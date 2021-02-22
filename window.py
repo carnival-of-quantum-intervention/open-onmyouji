@@ -16,8 +16,8 @@ def getHandle(titlename):
 
 def click(x, y):
     import pyautogui
-    pyautogui.moveTo(x, y)
-    # pyautogui.click(x, y)
+    # pyautogui.moveTo(x, y)
+    pyautogui.click(x, y)
 
 
 def getRect(hwnd):
