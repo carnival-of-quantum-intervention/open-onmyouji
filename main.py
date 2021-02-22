@@ -1,23 +1,23 @@
 # 加载环境包
+import json
 from window import *
 from picture import *
 import keyboard
 import time
 
 
-def getRadius(screenWidth, windowWidth):
-    # 结果
-    Radius = 70 * windowWidth / screenWidth
-    return Radius
-
-
-hwnd = getHandle("阴阳师-网易游戏")
-if hwnd == 0:
+configs = json.loads("config.json")
+print(configs)
+index = int(input("Input the index of the configure you'd like to use."))
+HWND = getHandle(configs["title"])
+if HWND == 0:
     print("Can't find onmyouji.")
-    exit(-1)
+    exit(1)
+
+config = configs["config"][index]
 
 ScreenWidth, ScreenHeight = getScreenSize()
-LEFT, TOP, RIGHT, BOTTOM = getRect(hwnd)
+LEFT, TOP, RIGHT, BOTTOM = getRect(HWND)
 WindowWidth = RIGHT - LEFT
 
 global on
@@ -32,17 +32,17 @@ def watchEsc(Event):
 
 keyboard.hook(watchEsc)
 while(on):
-    captureWindowAs(hwnd, "cache/cache.png")
+    import shutil
+    shutil.rmtree("./cache")
+
+    captureWindowAs(HWND, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
-    r = int(getRadius(ScreenWidth, WindowWidth))
+    r = int(config["ratio"] * WindowWidth)
     P = findCircles(img, r)[0]  # 去掉circles数组一层外括号
 
-    print("圆的个数是：", len(P))
-    for i in P:
-        print("圆心坐标为：", (int(i[0]), int(i[1])), "圆的半径是：", int(i[2]))
     test = processImage(cv2.imread("pic.png"))
 
-    x, y = findSimilarestPictureWith(P, test)
+    x, y = findSimilarestPictureWith(P, img, test)
     X = x + LEFT
     Y = y + TOP
     if(len(P) > 0):

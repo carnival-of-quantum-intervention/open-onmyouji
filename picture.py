@@ -71,20 +71,20 @@ def compare(img1, img2):
     return res/(all_sum/2)
 
 
-def findSimilarestPictureWith(Circles, ExpectImg):
+def findSimilarestPictureWith(Circles, images, ExpectImage):
     count = 0
 
     potentialPoints = []
 
     for i in Circles:
-        if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (img.shape)[1] or i[0]+i[2] > (img.shape)[0]:
+        if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (images.shape)[1] or i[0]+i[2] > (images.shape)[0]:
             continue
-        cropImg = img[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
-        cv2.imwrite("cache/"+str(count)+".jpg", cropImg)
-        cropImg = cv2.resize(cropImg, (100, 100),
-                             interpolation=cv2.INTER_CUBIC)
-        cropImg = cv2.cvtColor(cropImg, cv2.COLOR_BGR2GRAY)
-        ret = compare(cropImg, test)
+        cropImage = images[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
+        cv2.imwrite("cache/"+str(count)+".jpg", cropImage)
+        cropImage = cv2.resize(cropImage, (100, 100),
+                               interpolation=cv2.INTER_CUBIC)
+        cropImage = cv2.cvtColor(cropImage, cv2.COLOR_BGR2GRAY)
+        ret = compare(cropImage, ExpectImage)
         potentialPoints.append([i[0], i[1], ret])
         count += 1
 
