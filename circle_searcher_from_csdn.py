@@ -80,11 +80,56 @@ def findCircles(img, r):
     # np.around返回四舍五入后的值
     return circles
 
-# hwnd为窗口的编号，0号表示当前活跃窗口
+
+def compare(img1, img2):
+    res = 0
+    all_sum = 0
+    width = img1.shape[0]
+    height = img1.shape[1]
+    rx = width/2
+    ry = height/2
+    for i in range(img1.shape[0]):
+        for j in range(img1.shape[1]):
+            all_sum += int(img1[i, j])+int(img2[i, j])
+            #print(pow(rx-i,2),"+",pow(ry-j,2) ,"?", pow(width/2,2))
+            if pow(rx-i, 2)+pow(ry-j, 2) > pow(width/2, 2):
+                # print(i,",",j)
+                continue
+            res += abs(int(img1[i, j])-int(img2[i, j]))
+    return res/(all_sum/2)
+
+
+def findSimilarestPictureWith(Circles, ):
+    count = 0
+
+    clickPoints = []
+
+    for i in Circles:
+        if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (img.shape)[1] or i[0]+i[2] > (img.shape)[0]:
+            continue
+        cropImg = img[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
+        cv2.imwrite("cache/"+str(count)+".jpg", cropImg)
+        cropImg = cv2.resize(cropImg, (100, 100),
+                             interpolation=cv2.INTER_CUBIC)
+        cropImg = cv2.cvtColor(cropImg, cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(test, 127, 255, 0)
+        ret, thresh2 = cv2.threshold(cropImg, 127, 255, 0)
+        contours, hierarchy = cv2.findContours(thresh, mode=2, method=1)
+        cnt1 = contours[0]
+        contours, hierarchy = cv2.findContours(thresh2, mode=2, method=1)
+        cnt2 = contours[0]
+        ret = cv2.matchShapes(cnt1, cnt2, 1, 0.0)
+        clickPoints.append([i[0], i[1], ret])
+        print(ret)
+        count += 1
+
+    # clickPoints.sort(key=operator.itemgetter(2), reverse=True)
+    clickPoints.sort(key=lambda _tuple: _tuple[2])
+    print(clickPoints)
 
 
 def captureWindowsAs(hwnd, filename):
-    import time
+    """ hwnd为窗口的编号，0号表示当前活跃窗口"""
     import win32gui
     import win32ui
     import win32con
@@ -119,7 +164,7 @@ def click(x, y):
 hwnd = getHandle("阴阳师-网易游戏")
 
 while(True):
-    captureWindowsAs(hwnd, "cache/cache.png")
+    # captureWindowsAs(hwnd, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
     r = int(getRadius(hwnd))
     P = findCircles(img, r)[0]  # 去掉circles数组一层外括号
@@ -127,34 +172,10 @@ while(True):
     test = cv2.imread("pic.png")
     test = cv2.resize(test, (100, 100), interpolation=cv2.INTER_CUBIC)
     test = cv2.cvtColor(test, cv2.COLOR_BGR2GRAY)
-    # print(test[0, 0])
-    count = 0
 
-    clickPoints = []
-
-    for i in P:
-        if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (img.shape)[1] or i[0]+i[2] > (img.shape)[0]:
-            continue
-        cropImg = img[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
-        cv2.imwrite("cache/"+str(count)+".jpg", cropImg)
-        cropImg = cv2.resize(cropImg, (100, 100),
-                             interpolation=cv2.INTER_CUBIC)
-        cropImg = cv2.cvtColor(cropImg, cv2.COLOR_BGR2GRAY)
-        ret, thresh = cv2.threshold(test, 127, 255, 0)
-        ret, thresh2 = cv2.threshold(cropImg, 127, 255, 0)
-        contours, hierarchy = cv2.findContours(thresh, mode=2, method=1)
-        cnt1 = contours[0]
-        contours, hierarchy = cv2.findContours(thresh2, mode=2, method=1)
-        cnt2 = contours[0]
-        ret = cv2.matchShapes(cnt1, cnt2, 1, 0.0)
-        clickPoints.append([i[0], i[1], ret])
-        print(ret)
-        count += 1
-
-    clickPoints.sort(key=operator.itemgetter(2), reverse=True)
-    # clickPoints.sort(key=lambda _tuple: _tuple[2])
-    print(clickPoints)
-    if(len(P)>0): click(*(clickPoints[0][0:2]))
+    clickPoints = findSimilarestPictureWith()
+    if(len(P) > 0):
+        click(*(clickPoints[0][0:2]))
     print("圆的个数是：", len(P))
     for i in P:
         r = int(i[2])
@@ -167,4 +188,4 @@ while(True):
     # cv2.waitKey(0)  # 无穷大等待时间
     # cv2.destroyAllWindows()
 
-    # time.sleep(1)
+    time.sleep(1)
