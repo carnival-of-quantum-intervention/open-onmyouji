@@ -1,5 +1,5 @@
 # 加载环境包
-import operator
+import keyboard
 import cv2
 import time
 import numpy as np
@@ -20,13 +20,15 @@ def getHandle(titlename):
 # 确定圆大小
 
 
-def getRadius(hwnd):
+def getRect(hwnd):
     import win32gui
-    width, height = getScreenSize()
     # 获取窗口左上角和右下角坐标
-    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+    return win32gui.GetWindowRect(hwnd)
+
+
+def getRadius(screenWidth, windowWidth):
     # 结果
-    Radius = 70 * (right - left) / width
+    Radius = 70 * windowWidth / screenWidth
     return Radius
 
 
@@ -99,10 +101,10 @@ def compare(img1, img2):
     return res/(all_sum/2)
 
 
-def findSimilarestPictureWith(Circles, ):
+def findSimilarestPictureWith(Circles, ExpectImg):
     count = 0
 
-    clickPoints = []
+    potentialPoints = []
 
     for i in Circles:
         if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (img.shape)[1] or i[0]+i[2] > (img.shape)[0]:
@@ -112,20 +114,15 @@ def findSimilarestPictureWith(Circles, ):
         cropImg = cv2.resize(cropImg, (100, 100),
                              interpolation=cv2.INTER_CUBIC)
         cropImg = cv2.cvtColor(cropImg, cv2.COLOR_BGR2GRAY)
-        ret, thresh = cv2.threshold(test, 127, 255, 0)
-        ret, thresh2 = cv2.threshold(cropImg, 127, 255, 0)
-        contours, hierarchy = cv2.findContours(thresh, mode=2, method=1)
-        cnt1 = contours[0]
-        contours, hierarchy = cv2.findContours(thresh2, mode=2, method=1)
-        cnt2 = contours[0]
-        ret = cv2.matchShapes(cnt1, cnt2, 1, 0.0)
-        clickPoints.append([i[0], i[1], ret])
-        print(ret)
+        ret = compare(cropImg, test)
+        potentialPoints.append([i[0], i[1], ret])
         count += 1
 
-    # clickPoints.sort(key=operator.itemgetter(2), reverse=True)
-    clickPoints.sort(key=lambda _tuple: _tuple[2])
-    print(clickPoints)
+    # potentialPoints.sort(key=operator.itemgetter(2), reverse=True)
+    potentialPoints.sort(key=lambda _tuple: _tuple[2])
+    print(potentialPoints)
+    ChosenPoint = potentialPoints[0]
+    return ChosenPoint[0], ChosenPoint[1]
 
 
 def captureWindowsAs(hwnd, filename):
@@ -156,36 +153,54 @@ def captureWindowsAs(hwnd, filename):
     saveBitMap.SaveBitmapFile(saveDC, filename)
 
 
+def ProcessImage(image):
+    image = cv2.resize(image, (100, 100), interpolation=cv2.INTER_CUBIC)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image
+
+
 def click(x, y):
     import pyautogui
-    pyautogui.click(x, y)
+    pyautogui.moveTo(x, y)
+    # pyautogui.click(x, y)
 
 
 hwnd = getHandle("阴阳师-网易游戏")
+if hwnd == 0:
+    print("Can't find onmyouji.")
+    exit(-1)
 
-while(True):
-    # captureWindowsAs(hwnd, "cache/cache.png")
+ScreenWidth, ScreenHeight = getScreenSize()
+LEFT, TOP, RIGHT, BOTTOM = getRect(hwnd)
+WindowWidth = RIGHT - LEFT
+
+global on
+on = True
+
+
+def watchEsc(Event):
+    if Event.event_type == 'down' and Event.name == 'esc':
+        global on
+        on = False
+
+
+keyboard.hook(watchEsc)
+while(on):
+    captureWindowsAs(hwnd, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
-    r = int(getRadius(hwnd))
+    r = int(getRadius(ScreenWidth, WindowWidth))
     P = findCircles(img, r)[0]  # 去掉circles数组一层外括号
 
-    test = cv2.imread("pic.png")
-    test = cv2.resize(test, (100, 100), interpolation=cv2.INTER_CUBIC)
-    test = cv2.cvtColor(test, cv2.COLOR_BGR2GRAY)
-
-    clickPoints = findSimilarestPictureWith()
-    if(len(P) > 0):
-        click(*(clickPoints[0][0:2]))
     print("圆的个数是：", len(P))
     for i in P:
-        r = int(i[2])
-        x = int(i[0])
-        y = int(i[1])
-        print("圆心坐标为：", (x, y), "圆的半径是：", r)
+        print("圆心坐标为：", (int(i[0]), int(i[1])), "圆的半径是：", int(i[2]))
+    test = ProcessImage(cv2.imread("pic.png"))
 
-    # cv2.imshow('Detected circles', img)  # 第一参数为窗口名称
-
-    # cv2.waitKey(0)  # 无穷大等待时间
-    # cv2.destroyAllWindows()
+    x, y = findSimilarestPictureWith(P, test)
+    X = x + LEFT
+    Y = y + TOP
+    if(len(P) > 0):
+        print("Willing to click ", X, Y)
+        click(X, Y)
 
     time.sleep(1)
