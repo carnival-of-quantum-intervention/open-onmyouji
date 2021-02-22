@@ -72,6 +72,8 @@ def compare(img1, img2):
 
 
 def findSimilarestPictureWith(Circles, images, ExpectImage):
+    import os.path
+    import os
     count = 0
 
     potentialPoints = []
@@ -85,14 +87,23 @@ def findSimilarestPictureWith(Circles, images, ExpectImage):
                                interpolation=cv2.INTER_CUBIC)
         cropImage = cv2.cvtColor(cropImage, cv2.COLOR_BGR2GRAY)
         ret = compare(cropImage, ExpectImage)
-        potentialPoints.append([i[0], i[1], ret])
+        if ret <= 0.35:
+            potentialPoints.append([i[0], i[1], ret])
         count += 1
+    # 移除多余的文件
+    while os.path.exists("cache/"+str(count)+".jpg"):
+        os.remove("cache/"+str(count)+".jpg")
+        count += 1
+    count = None
 
     # potentialPoints.sort(key=operator.itemgetter(2), reverse=True)
     potentialPoints.sort(key=lambda _tuple: _tuple[2])
     print(potentialPoints)
-    ChosenPoint = potentialPoints[0]
-    return ChosenPoint[0], ChosenPoint[1]
+    if len(potentialPoints) == 0:
+        return 0, 0
+    else:
+        ChosenPoint = potentialPoints[0]
+        return ChosenPoint[0], ChosenPoint[1]
 
 
 def processImage(image):

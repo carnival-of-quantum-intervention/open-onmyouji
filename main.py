@@ -5,8 +5,7 @@ from picture import *
 import keyboard
 import time
 
-
-configs = json.loads("config.json")
+configs = json.load(open("config.json", 'r', encoding="utf-8"))
 print(configs)
 index = int(input("Input the index of the configure you'd like to use."))
 HWND = getHandle(configs["title"])
@@ -17,35 +16,41 @@ if HWND == 0:
 config = configs["config"][index]
 
 ScreenWidth, ScreenHeight = getScreenSize()
-LEFT, TOP, RIGHT, BOTTOM = getRect(HWND)
-WindowWidth = RIGHT - LEFT
+
+global left, top, right, bottom
+left, top, right, bottom = getRect(HWND)
+WindowWidth = right - left
 
 global on
 on = True
 
 
 def watchEsc(Event):
-    if Event.event_type == 'down' and Event.name == 'esc':
-        global on
-        on = False
+    if Event.event_type == 'down':
+        if Event.name == 'esc':
+            global on
+            on = False
+        if Event.name == 'f5':
+            global left, top, right, bottom, WindowWidth
+            left, top, right, bottom = getRect(HWND)
+            WindowWidth = right - left
 
 
 keyboard.hook(watchEsc)
 while(on):
-    import shutil
-    shutil.rmtree("./cache")
 
     captureWindowAs(HWND, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
     r = int(config["ratio"] * WindowWidth)
     P = findCircles(img, r)[0]  # 去掉circles数组一层外括号
 
-    test = processImage(cv2.imread("pic.png"))
+    raw_image = cv2.imread(config["image"])
+    image = processImage(raw_image)
 
-    x, y = findSimilarestPictureWith(P, img, test)
-    X = x + LEFT
-    Y = y + TOP
-    if(len(P) > 0):
+    x, y = findSimilarestPictureWith(P, img, image)
+    X = x + left
+    Y = y + top
+    if x and y:
         print("Willing to click ", X, Y)
         click(X, Y)
 

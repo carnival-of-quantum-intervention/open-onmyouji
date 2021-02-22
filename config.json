@@ -2,7 +2,7 @@
   "title": "阴阳师-网易游戏",
   "config": [
     {
-      "image": "pic/explore.png",
+      "image": "picture/explore.png",
       "name": "探索",
       "ratio": 0.036458,
       "type": "locate"
