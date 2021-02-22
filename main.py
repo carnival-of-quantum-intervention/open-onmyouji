@@ -42,12 +42,12 @@ while(on):
     captureWindowAs(HWND, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
     r = int(config["ratio"] * WindowWidth)
-    P = findCircles(img, r)[0]  # 去掉circles数组一层外括号
+    Circles = findCircles(img, r)[0]  # 去掉circles数组一层外括号
 
     raw_image = cv2.imread(config["image"])
     image = processImage(raw_image)
 
-    x, y = findSimilarestPictureWith(P, img, image)
+    x, y = findSimilarestPictureWith(Circles, img, image)
     X = x + left
     Y = y + top
     if x and y:
