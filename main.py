@@ -33,7 +33,7 @@ configList = [item["name"] for item in configs["config"]]
 
 HWND = getHandle(configs["title"])
 if HWND == 0:
-    print("Can't find onmyouji.")
+    print("Can't find such window.")
     exit(1)
 
 
@@ -54,6 +54,10 @@ def watchEsc(Event):
             global left, top, right, bottom, windowWidth
             left, top, right, bottom = getRect(HWND)
             windowWidth = right - left
+        if Event.name == 'space':
+            global mainThread, stateStr
+            mainThread.set(-1)
+            stateStr.set("Paused")
 
 
 keyboard.hook(watchEsc)
