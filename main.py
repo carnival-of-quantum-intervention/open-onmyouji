@@ -1,6 +1,5 @@
 # 加载环境包
 import json
-from os import stat
 from typing import Mapping
 from window import *
 from picture import *
@@ -77,10 +76,12 @@ ROOT = tkinter.Tk()
 global stateStr, resultStr
 stateStr = tkinter.StringVar()
 stateStr.set("Waiting")
-resultStr = tkinter.StringVar()
-resultStr.set("Not found")
 state = tkinter.Label(ROOT, textvariable=stateStr)
 state.pack()
+resultStr = tkinter.StringVar()
+resultStr.set("Not found")
+result = tkinter.Label(ROOT, textvariable=resultStr)
+result.pack()
 
 
 class thread(threading.Thread):
@@ -113,7 +114,6 @@ lb = tkinter. Listbox(ROOT)
 
 def CallOn(event):
     global mainThread
-    print(mainThread)
     mainThread.set(lb.curselection()[0])
 
 
