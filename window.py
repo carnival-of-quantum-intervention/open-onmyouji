@@ -54,6 +54,7 @@ def captureWindowAs(hwnd, filename):
     saveDC.SelectObject(saveBitMap)
     # 截取从左上角（0，0）长宽为（w，h）的图片
     saveDC.BitBlt((0, 0), (w, h), mfcDC, (0, 0), win32con.SRCCOPY)
+
     saveBitMap.SaveBitmapFile(saveDC, filename)
 
     import cv2
@@ -65,5 +66,5 @@ def captureWindowAs(hwnd, filename):
         'RGB', (bmpinfo['bmWidth'], bmpinfo['bmHeight']), bmparray, 'raw', 'BGRX', 0, 1)
     pil_array = numpy.array(pil_im)
     cv_im = cv2.cvtColor(pil_array, cv2.COLOR_RGB2BGR)
-
+    # cv2.imwrite("cache/buf.png", cv_im)
     return cv_im
