@@ -39,7 +39,7 @@ def findCircles(img, r):
                                minDist=80, param1=100, param2=20, minRadius=r-5, maxRadius=r+5)  # 霍夫圆变换
     if circles is None:
         print("No circles found.")
-        return [[]]
+        return []
     # 第3参数默认为1
     # 第4参数表示圆心与圆心之间的距离（太大的话，会很多圆被认为是一个圆）
     # 第5参数默认为100
@@ -50,7 +50,7 @@ def findCircles(img, r):
     circles = np.uint16(np.around(circles))
     # np.uint16数组转换为16位，0-65535
     # np.around返回四舍五入后的值
-    return circles
+    return circles[0]
 
 
 def compare(img1, img2):

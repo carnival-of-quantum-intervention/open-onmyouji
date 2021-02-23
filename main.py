@@ -16,11 +16,10 @@ cacheMap = {}
 
 def work(task):
     global cacheMap, WindowWidth
-
-    captureWindowAs(HWND, "cache/cache.png")
-    img = cv2.imread('cache/cache.png')  # 读取图片
+    # 读取图片
+    img = captureWindowAs(HWND, "cache/cache.png")
     r = int(task["ratio"] * WindowWidth)
-    Circles = findCircles(img, r)[0]  # 去掉circles数组一层外括号
+    Circles = findCircles(img, r)  # 去掉circles数组一层外括号
 
     if task["image"] in cacheMap:
         raw_image = cacheMap[task["image"]]
