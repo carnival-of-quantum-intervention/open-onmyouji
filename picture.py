@@ -38,7 +38,6 @@ def findCircles(img, r):
     circles = cv2.HoughCircles(imgray, method=cv2.HOUGH_GRADIENT, dp=1,
                                minDist=80, param1=100, param2=20, minRadius=r-5, maxRadius=r+5)  # 霍夫圆变换
     if circles is None:
-        print("No circles found.")
         return []
     # 第3参数默认为1
     # 第4参数表示圆心与圆心之间的距离（太大的话，会很多圆被认为是一个圆）
