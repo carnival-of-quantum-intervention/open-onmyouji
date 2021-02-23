@@ -105,6 +105,12 @@ def findSimilarestPictureWith(Circles, images, ExpectImage):
         return ChosenPoint[0], ChosenPoint[1]
 
 
+def filterColor(src, low_hsv, high_hsv):
+    hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lowerb=low_hsv, upperb=high_hsv)
+    return cv2.bitwise_and(mask, src)
+
+
 def processImage(image):
     image = cv2.resize(image, (100, 100), interpolation=cv2.INTER_CUBIC)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
