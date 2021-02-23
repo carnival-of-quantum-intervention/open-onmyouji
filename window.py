@@ -23,7 +23,9 @@ def click(x, y):
 def getRect(hwnd):
     import win32gui
     # 获取窗口左上角和右下角坐标
-    return win32gui.GetWindowRect(hwnd)
+    windowRect = win32gui.GetWindowRect(hwnd)
+    clientRect = win32gui.GetClientRect(hwnd)
+    return *[i + j for (i, j) in zip(windowRect, clientRect)],
 
 
 def captureWindowAs(hwnd, filename):
