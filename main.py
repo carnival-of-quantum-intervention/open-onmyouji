@@ -1,6 +1,7 @@
 # 加载环境包
 import json
 from os import stat
+from typing import Mapping
 from window import *
 from picture import *
 import threading
@@ -9,23 +10,34 @@ import time
 import tkinter
 
 
-def work(config):
+global cacheMap
+cacheMap = {}
+
+
+def work(task):
+    global cacheMap, WindowWidth
+
     captureWindowAs(HWND, "cache/cache.png")
     img = cv2.imread('cache/cache.png')  # 读取图片
-    r = int(config["ratio"] * WindowWidth)
+    r = int(task["ratio"] * WindowWidth)
     Circles = findCircles(img, r)[0]  # 去掉circles数组一层外括号
 
-    raw_image = cv2.imread(config["image"])
+    if task["image"] in cacheMap:
+        raw_image = cacheMap[task["image"]]
+    else:
+        raw_image = cv2.imread(task["image"])
+        cacheMap[task["image"]] = raw_image
+
     image = processImage(raw_image)
 
     x, y = findSimilarestPictureWith(Circles, img, image)
-    X = x + left
-    Y = y + top
     if x and y:
+        X = x + left
+        Y = y + top
         print("Willing to click ", X, Y)
         click(X, Y)
-
-    time.sleep(1)
+    elif "fallback" in task:
+        work(task["fallback"])
 
 
 configs = json.load(open("config.json", 'r', encoding="utf-8"))
@@ -84,7 +96,8 @@ class thread(threading.Thread):
         while on:
             if self.__index >= 0:
                 stateStr.set("Working")
-                work(configs["config"][self.__index])
+                work(configs["config"][self.__index]["task"])
+            time.sleep(1)
         stateStr.set("Dead")
 
 

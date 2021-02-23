@@ -2,10 +2,19 @@
   "title": "阴阳师-网易游戏",
   "config": [
     {
-      "image": "picture/explore.png",
       "name": "探索",
-      "ratio": 0.036458,
-      "type": "locate"
+      "task": {
+        "type": "locate",
+        "shape": "circle",
+        "ratio": 0.036458,
+        "image": "picture/explore-boss.png",
+        "fallback": {
+          "type": "locate",
+          "shape": "circle",
+          "ratio": 0.036458,
+          "image": "picture/explore.png"
+        }
+      }
     }
   ]
 }
