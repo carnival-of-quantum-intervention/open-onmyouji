@@ -1,4 +1,7 @@
 
+from os import write
+
+
 def getScreenSize():
     import win32api
     import win32con
@@ -23,9 +26,9 @@ def click(x, y):
 def getRect(hwnd):
     import win32gui
     # 获取窗口左上角和右下角坐标
-    windowRect = win32gui.GetWindowRect(hwnd)
-    clientRect = win32gui.GetClientRect(hwnd)
-    return *[i + j for (i, j) in zip(windowRect, clientRect)],
+    wLeft, wTop, wRight, wBottom = win32gui.GetWindowRect(hwnd)
+    cLeft, cTop, cRight, cBottom = win32gui.GetClientRect(hwnd)
+    return wLeft+cLeft, wTop+cTop, wLeft+cRight, wTop+cBottom
 
 
 def captureWindowAs(hwnd, filename):
