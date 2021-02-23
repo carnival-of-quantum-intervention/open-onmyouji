@@ -27,9 +27,9 @@ def getRect(hwnd):
     import win32con
     # 获取窗口左上角和右下角坐标
     wLeft, wTop, wRight, wBottom = win32gui.GetWindowRect(hwnd)
-    cLeft, cTop, cRight, cBottom = win32gui.GetClientRect(hwnd)
+    #cLeft, cTop, cRight, cBottom = win32gui.GetClientRect(hwnd)
     hTitle = win32api.GetSystemMetrics(win32con.SM_CYSIZE)
-    return wLeft + cLeft, hTitle + wTop + cTop, wLeft + cRight, wTop + cBottom + hTitle
+    return wLeft, hTitle + wTop, wRight,  wBottom
 
 
 def captureWindowAs(hwnd, filename):
@@ -43,4 +43,6 @@ def captureWindowAs(hwnd, filename):
     im = np.array(img)
     im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
     left, top, right, bottom = getRect(hwnd)
-    return im[top:bottom, left:right]
+    im = im[top:bottom, left:right]
+    cv2.imwrite(filename, im)
+    return im
