@@ -1,6 +1,4 @@
 
-from os import write
-
 
 def getScreenSize():
     import win32api
