@@ -67,6 +67,7 @@ def compare(img1, img2):
                 # print(i,",",j)
                 continue
             res += abs(int(img1[i, j])-int(img2[i, j]))
+    print(res, all_sum/2)
     return res/(all_sum/2)
 
 
