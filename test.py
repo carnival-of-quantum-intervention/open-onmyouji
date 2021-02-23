@@ -10,7 +10,7 @@ src = captured
 cv2.namedWindow("input", cv2.WINDOW_AUTOSIZE)
 cv2.imshow("input", src)
 """
-提取图中的红色部分
+提取图中的黄色部分
 """
 hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
 low_hsv = np.array([3, 220, 220])
