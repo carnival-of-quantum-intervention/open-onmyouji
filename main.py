@@ -17,26 +17,25 @@ cacheMap = {}
 def work(task):
     global cacheMap, WindowWidth
     # 读取图片
-    img = captureWindowAs(HWND, "cache/cache.png")
+    captured = captureWindowAs(HWND, "cache/cache.png")
     r = int(task["ratio"] * WindowWidth)
-    Circles = findCircles(img, r)  # 去掉circles数组一层外括号
+    Circles = findCircles(captured, r)  # 去掉circles数组一层外括号
+    if len(Circles) != 0:
+        if task["image"] in cacheMap:
+            raw_image = cacheMap[task["image"]]
+        else:
+            raw_image = cv2.imread(task["image"])
+            cacheMap[task["image"]] = raw_image
 
-    if task["image"] in cacheMap:
-        raw_image = cacheMap[task["image"]]
-    else:
-        raw_image = cv2.imread(task["image"])
-        cacheMap[task["image"]] = raw_image
-
-    image = processImage(raw_image)
-
-    x, y = findSimilarestPictureWith(Circles, img, image)
-    if x and y:
-        X = x + left
-        Y = y + top
-        print("Willing to click ", X, Y)
-        click(X, Y)
-    elif "fallback" in task:
-        work(task["fallback"])
+        expect = processImage(raw_image)
+        x, y = findSimilarestPictureWith(Circles, captured, expect)
+        if x and y:
+            X = x + left
+            Y = y + top
+            print("Willing to click ", X, Y)
+            click(X, Y)
+            return True
+        return "fallback" in task and work(task["fallback"])
 
 
 configs = json.load(open("config.json", 'r', encoding="utf-8"))
@@ -75,9 +74,11 @@ keyboard.hook(watchEsc)
 
 ROOT = tkinter.Tk()
 
-global stateStr
+global stateStr, resultStr
 stateStr = tkinter.StringVar()
 stateStr.set("Waiting")
+resultStr = tkinter.StringVar()
+resultStr.set("Not found")
 state = tkinter.Label(ROOT, textvariable=stateStr)
 state.pack()
 
@@ -92,10 +93,14 @@ class thread(threading.Thread):
 
     def run(self):
         global stateStr
+        config = configs["config"]
         while on:
             if self.__index >= 0:
                 stateStr.set("Working")
-                work(configs["config"][self.__index]["task"])
+                global resultStr
+                resultStr = "Found"if work(
+                    config[self.__index]["task"])else "Not found"
+
             time.sleep(1)
         stateStr.set("Dead")
 
