@@ -47,7 +47,8 @@ def find_full(bg_img, expect_img):
 
 if __name__ == '__main__':
     p1 = cv2.imread("test.png")
-    p2 = cv2.imread("full.png")
+    p2 = cv2.imread("picture/full.png")
     p1 = cv2.cvtColor(p1, cv2.COLOR_BGR2GRAY)
     p2 = cv2.cvtColor(p2, cv2.COLOR_BGR2GRAY)
     res = find_full(p1, p2)
+    print(res)
