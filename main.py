@@ -27,7 +27,8 @@ def work(task):
             cacheMap[task["image"]] = raw_image
 
         expect = processImage(raw_image)
-        x, y = findSimilarestPictureWith(Circles, captured, expect)
+        x, y = findSimilarestPictureWith(
+            Circles, captured, expect, compareFunc=compareCircle)
         if x and y:
             X = x + left
             Y = y + top
@@ -56,9 +57,6 @@ on = True
 
 def watchEsc(Event):
     if Event.event_type == 'down':
-        if Event.name == 'esc':
-            global on
-            on = False
         if Event.name == 'f5':
             global left, top, right, bottom, windowWidth
             left, top, right, bottom = getRect(HWND)

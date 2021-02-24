@@ -31,10 +31,6 @@ def findCircles(img, r):
 
     imgray = cv2.Canny(dilation, 30, 100)  # Canny边缘检测算子
 
-    # cv2.imshow('Step 1',th3)#第一参数为窗口名称
-    # cv2.imshow('Step 2',erosion)#第一参数为窗口名称
-    # cv2.imshow('Step 3',imgray)#第一参数为窗口名称
-
     circles = cv2.HoughCircles(imgray, method=cv2.HOUGH_GRADIENT, dp=1,
                                minDist=80, param1=100, param2=20, minRadius=r-5, maxRadius=r+5)  # 霍夫圆变换
     if circles is None:
@@ -52,7 +48,7 @@ def findCircles(img, r):
     return circles[0]
 
 
-def compare(img1, img2):
+def compareCircle(img1, img2):
     res = 0
     all_sum = 0
     width = img1.shape[0]
@@ -70,14 +66,14 @@ def compare(img1, img2):
     return res/(all_sum/2)
 
 
-def findSimilarestPictureWith(Circles, images, ExpectImage):
+def findSimilarestPictureWith(subImageParams, images, expectImage, compareFunc):
     import os.path
     import os
     count = 0
 
     potentialPoints = []
 
-    for i in Circles:
+    for i in subImageParams:
         if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (images.shape)[1] or i[0]+i[2] > (images.shape)[0]:
             continue
         cropImage = images[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
@@ -85,7 +81,7 @@ def findSimilarestPictureWith(Circles, images, ExpectImage):
         cropImage = cv2.resize(cropImage, (100, 100),
                                interpolation=cv2.INTER_CUBIC)
         cropImage = cv2.cvtColor(cropImage, cv2.COLOR_BGR2GRAY)
-        ret = compare(cropImage, ExpectImage)
+        ret = compareFunc(cropImage, expectImage)
         if ret <= 0.35:
             potentialPoints.append([i[0], i[1], ret])
         count += 1
