@@ -1,4 +1,5 @@
 import cv2
+import mouse
 import picture
 import threading
 import time
@@ -21,6 +22,22 @@ def findCirclePictureIn(captured, task,  r):
         if x and y:
             return (x, y)
     return None
+
+
+def clickAt(captured, task, points):
+    point = None
+    if points == None or len(points) == 0:
+        if "position" in task and task["position"] >= 2:
+            a = task["position"][0]
+            b = task["position"][1]
+            point = a
+        else:
+            point = None
+    else:
+        if len(points[0] >= 2):
+            point = points[0][0:2]
+    mouse.click(*point)
+    return point
 
 
 class thread(threading.Thread):
@@ -72,10 +89,19 @@ class thread(threading.Thread):
         if task["type"] == "locate":
             res = findCirclePictureIn(
                 captured, task, int(task["ratio"] * windowWidth))
+        elif task["type"] == "click":
+            res = clickAt(captured, task, arg)
+        elif task["type"] == "count":
+            res = len(arg)
+        elif task["type"] == "cut":
+            if "count" in task:
+                res = None
+            else:
+                res = arg[0:task["count"]]
 
         if "then" in task:
             return self.execute(task["then"], res)
-        return "otherwise" in task and self.execute(task["otherwise"])
+        return "otherwise" in task and self.execute(task["otherwise"], arg)
 
 
 global cacheMap
