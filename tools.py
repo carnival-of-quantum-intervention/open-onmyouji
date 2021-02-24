@@ -1,21 +1,22 @@
 import cv2
+from numpy.lib.npyio import NpzFile
 import mouse
 import picture
 import threading
 import time
 import tkinter
 import window
+import cache
+
+
+def readImage(filename):
+    return cache.readBy(filename, cv2.imread)
 
 
 def findCirclePictureIn(captured, task,  r):
     Circles = picture.findCircles(captured, r)  # 去掉circles数组一层外括号
     if len(Circles) != 0:
-        if task["image"] in cacheMap:
-            raw_image = cacheMap[task["image"]]
-        else:
-            raw_image = cv2.imread(task["image"])
-            cacheMap[task["image"]] = raw_image
-
+        raw_image = readImage(task["image"])
         expect = picture.processImage(raw_image)
         x, y = picture.findSimilarestPictureWith(
             Circles, captured, expect, compareFunc=picture.compareCircle)
@@ -24,10 +25,10 @@ def findCirclePictureIn(captured, task,  r):
     return None
 
 
-def clickAt(captured, task, points):
+def clickAt(captured, task, points, hwnd):
     point = None
     if points == None or len(points) == 0:
-        if "position" in task and task["position"] >= 2:
+        if "position" in task and len(task["position"]) >= 2:
             a = task["position"][0]
             b = task["position"][1]
             point = a
@@ -36,7 +37,8 @@ def clickAt(captured, task, points):
     else:
         if len(points[0] >= 2):
             point = points[0][0:2]
-    mouse.click(*point)
+    if point != None:
+        mouse.click(*window.getAbsolutePos(hwnd, point))
     return point
 
 
@@ -70,7 +72,7 @@ class thread(threading.Thread):
                 self.stateStr.set("Working")
                 global resultStr
                 self.resultStr.set("Found"if self.execute(
-                    config[self.__index]["task"])else "Not found")
+                    config[self.__index]["task"], None)else "Not found")
 
             time.sleep(1)
 
@@ -87,17 +89,41 @@ class thread(threading.Thread):
             print("Please specify the task type.")
             return
         if task["type"] == "locate":
-            res = findCirclePictureIn(
-                captured, task, int(task["ratio"] * windowWidth))
+            if "shape" in task:
+                if task["shape"] == "circle":
+                    res = findCirclePictureIn(
+                        captured, task, int(task["ratio"] * windowWidth))
+                else:
+                    print("Unrecognized shape", task["shape"])
+            elif "color" in task:
+                if "model" in task["color"]:
+                    if task["color"]["model"] == "hsv":
+                        if "image" in task["color"]:
+                            res = picture.findColor(
+                                captured, readImage(task["color"]["image"]))
+                    else:
+                        print("Unrecognized color model",
+                              task["color"]["model"])
         elif task["type"] == "click":
-            res = clickAt(captured, task, arg)
+            res = clickAt(captured, task, arg, HWND)
         elif task["type"] == "count":
-            res = len(arg)
-        elif task["type"] == "cut":
-            if "count" in task:
+            if arg != None:
+                res = len(arg)
+            else:
+                res = 0
+        elif task["type"] == "take":
+            if "count" not in task:
                 res = None
             else:
                 res = arg[0:task["count"]]
+        elif task["type"] == "compare":
+            if arg < task["value"]:
+                return ()
+            else:
+                return None
+        else:
+            print("Unrecognized type", task["type"])
+            return None
 
         if "then" in task:
             return self.execute(task["then"], res)

@@ -17,7 +17,7 @@
         "then": {
           "type": "click",
           "then": {
-            "type": "find",
+            "type": "locate",
             "color": {
               "model": "hsv",
               "value": [
@@ -27,9 +27,25 @@
             },
             "image": "picture/full.png",
             "then": {
-              "type": "take",
-              "count": 1,
-              "then": { "type": "click", "position": [0.5, 0.8] }
+              "type": "count",
+              "then": {
+                "type": "compare",
+                "value": 2,
+                "then": {
+                  "type": "click",
+                  "position": [
+                    [0.5, 0.8],
+                    [0.5, 0.8]
+                  ]
+                },
+                "otherwise": {
+                  "type": "click",
+                  "position": [
+                    [0.85, 0.7],
+                    [0.95, 0.8]
+                  ]
+                }
+              }
             }
           }
         }

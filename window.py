@@ -38,6 +38,13 @@ def getRelativePos(hwnd, pos):
     return (pos.x - left) / width, (pos.y - top) / height
 
 
+def getAbsolutePos(hwnd, pos):
+    left, top, right, bottom = getRect(hwnd)
+    width = right-left
+    height = bottom-top
+    return pos[0] * width + left, pos[1] * height + top
+
+
 def captureWindowAs(hwnd, filename):
     from PIL import ImageGrab
     import numpy as np
