@@ -117,7 +117,7 @@ def findSimilarestPictureWith(subImageParams, images, expectImage, compareFunc):
 
     # potentialPoints.sort(key=operator.itemgetter(2), reverse=True)
     potentialPoints.sort(key=lambda _tuple: _tuple[2])
-    print(potentialPoints)
+    # print(potentialPoints)
     if len(potentialPoints) == 0:
         return 0, 0
     else:
