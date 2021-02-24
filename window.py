@@ -26,6 +26,11 @@ def getRect(hwnd):
     return wLeft, hTitle + wTop, wRight,  wBottom
 
 
+def getSize(hwnd):
+    left, top, right, bottom = getRect(hwnd)
+    return right - left, top - bottom
+
+
 def getRelativePos(hwnd, pos):
     left, top, right, bottom = getRect(hwnd)
     width = right-left

@@ -10,4 +10,3 @@ def getPos():
     import pyautogui
     pos = pyautogui.position()
     return pos
-
