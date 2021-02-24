@@ -8,11 +8,22 @@
         "shape": "circle",
         "ratio": 0.036458,
         "image": "picture/explore-boss.png",
-        "fallback": {
+        "otherwise": {
           "type": "locate",
           "shape": "circle",
           "ratio": 0.036458,
           "image": "picture/explore.png"
+        },
+        "then": {
+          "type": "click",
+          "then": {
+            "type": "find",
+            "hsv": [
+              [10, 200, 16],
+              [40, 255, 255]
+            ],
+            "then": { "type": "click", "position": [0.5, 0.8] }
+          }
         }
       }
     }

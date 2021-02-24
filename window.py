@@ -15,12 +15,6 @@ def getHandle(titlename):
 # 确定圆大小
 
 
-def click(x, y):
-    import pyautogui
-    # pyautogui.moveTo(x, y)
-    pyautogui.click(x, y)
-
-
 def getRect(hwnd):
     import win32gui
     import win32api
@@ -30,6 +24,13 @@ def getRect(hwnd):
     #cLeft, cTop, cRight, cBottom = win32gui.GetClientRect(hwnd)
     hTitle = win32api.GetSystemMetrics(win32con.SM_CYSIZE)
     return wLeft, hTitle + wTop, wRight,  wBottom
+
+
+def getRelativePos(hwnd, pos):
+    left, top, right, bottom = getRect(hwnd)
+    width = right-left
+    height = bottom-top
+    return (pos.x - left) / width, (pos.y - top) / height
 
 
 def captureWindowAs(hwnd, filename):

@@ -48,6 +48,30 @@ def findCircles(img, r):
     return circles[0]
 
 
+def findColor(src_img, expect_img, min_hsv, max_hsv):
+    import cv2
+    EXPECT_RATIO = expect_img.shape[0]/expect_img.shape[1]
+
+    kernel = np.ones(
+        (expect_img.shape[0]//8+1, expect_img.shape[1]//8+1), np.uint8)
+
+    bg = filterColor(src_img, min_hsv, max_hsv)
+    bg = cv2.dilate(bg, kernel, iterations=1)
+    # cv2.bitwise_not(bg, bg)  # 颜色反转
+    bg = cv2.erode(bg, kernel, iterations=1)
+    # cv2.bitwise_not(bg, bg)  # 颜色反转
+
+    # 检测连通域，每一个连通域以一系列的点表示，FindContours方法只能得到第一个域
+    contours, hierarchy = cv2.findContours(
+        bg, method=cv2.CHAIN_APPROX_SIMPLE, mode=cv2.RETR_EXTERNAL)
+
+    # 开始遍历
+    if contours != None:
+        return [cv2.boundingRect(contour) for contour in contours]
+    else:
+        return []
+
+
 def compareCircle(img1, img2):
     res = 0
     all_sum = 0
