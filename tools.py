@@ -7,6 +7,23 @@ import time
 import window
 
 
+def findCirclePictureIn(captured, task,  r):
+    Circles = picture.findCircles(captured, r)  # 去掉circles数组一层外括号
+    if len(Circles) != 0:
+        if task["image"] in cacheMap:
+            raw_image = cacheMap[task["image"]]
+        else:
+            raw_image = cv2.imread(task["image"])
+            cacheMap[task["image"]] = raw_image
+
+        expect = picture.processImage(raw_image)
+        x, y = picture.findSimilarestPictureWith(
+            Circles, captured, expect, compareFunc=picture.compareCircle)
+        if x and y:
+            return (x, y)
+    return None
+
+
 class thread(threading.Thread):
     def __init__(self, HWND, configs, index):
         self.__index = index
@@ -41,7 +58,7 @@ class thread(threading.Thread):
 
             time.sleep(1)
 
-    def execute(self, task):
+    def execute(self, task, arg):
         global cacheMap
         HWND = self.__hwnd
         left, top, right, bottom = window.getRect(HWND)
@@ -49,25 +66,17 @@ class thread(threading.Thread):
         # 读取图片
         captured = window.captureWindowAs(HWND, "cache/cache.png")
 
-        r = int(task["ratio"] * windowWidth)
-        Circles = picture.findCircles(captured, r)  # 去掉circles数组一层外括号
-        if len(Circles) != 0:
-            if task["image"] in cacheMap:
-                raw_image = cacheMap[task["image"]]
-            else:
-                raw_image = cv2.imread(task["image"])
-                cacheMap[task["image"]] = raw_image
+        res = None
+        if "type"not in task:
+            print("Please specify the task type.")
+            return
+        if task["type"] == "locate":
+            res = findCirclePictureIn(
+                captured, task, int(task["ratio"] * windowWidth))
 
-            expect = picture.processImage(raw_image)
-            x, y = picture.findSimilarestPictureWith(
-                Circles, captured, expect, compareFunc=picture.compareCircle)
-            if x and y:
-                X = x + left
-                Y = y + top
-                print("Willing to click ", X, Y)
-                mouse.click(X, Y)
-                return True
-            return "otherwise" in task and self.execute(task["otherwise"])
+        if "then" in task:
+            return self.execute(task["then"], res)
+        return "otherwise" in task and self.execute(task["otherwise"])
 
 
 global cacheMap
