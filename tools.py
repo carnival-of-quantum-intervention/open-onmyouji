@@ -1,9 +1,8 @@
 import cv2
-import mouse
 import picture
 import threading
-import tkinter
 import time
+import tkinter
 import window
 
 

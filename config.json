@@ -18,11 +18,19 @@
           "type": "click",
           "then": {
             "type": "find",
-            "hsv": [
-              [10, 200, 16],
-              [40, 255, 255]
-            ],
-            "then": { "type": "click", "position": [0.5, 0.8] }
+            "color": {
+              "model": "hsv",
+              "value": [
+                [10, 200, 16],
+                [40, 255, 255]
+              ]
+            },
+            "image": "picture/full.png",
+            "then": {
+              "type": "take",
+              "count": 1,
+              "then": { "type": "click", "position": [0.5, 0.8] }
+            }
           }
         }
       }
