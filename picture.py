@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+COMPARE_THRESHOLD = 0.35
+
 
 def findCircles(img, r):
     # 图片简单处理
@@ -72,22 +74,38 @@ def findColor(src_img, expect_img, min_hsv, max_hsv):
         return []
 
 
-def compareCircle(img1, img2):
+def toGray(img):
+    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+
+def prepareForCompare(img):
+    return cv2.cvtColor(cv2.resize(img, (100, 100),
+                                   interpolation=cv2.INTER_CUBIC), cv2.COLOR_BGR2GRAY)
+
+
+def compareIn(img1, img2, rangeFunc):
     res = 0
     all_sum = 0
-    width = img1.shape[0]
-    height = img1.shape[1]
-    rx = width/2
-    ry = height/2
+    w = img1.shape[0]
+    h = img1.shape[1]
     for i in range(img1.shape[0]):
         for j in range(img1.shape[1]):
             all_sum += int(img1[i, j])+int(img2[i, j])
             #print(pow(rx-i,2),"+",pow(ry-j,2) ,"?", pow(width/2,2))
-            if pow(rx-i, 2)+pow(ry-j, 2) > pow(width/2, 2):
+            # pow(rx-i, 2)+pow(ry-j, 2) > pow(width/2, 2):
+            if rangeFunc(i, j, w, h):
                 # print(i,",",j)
                 continue
             res += abs(int(img1[i, j])-int(img2[i, j]))
     return res/(all_sum/2)
+
+
+def compareCircle(img1, img2):
+    return compareIn(img1, img2, lambda x, y, w, h: ((x-w/2)**2+(y-h/2)**2) > (w/2)**2)
+
+
+def compareFull(img1, img2):
+    return compareIn(img1, img2, lambda a, b, c, d: False)
 
 
 def findSimilarestPictureWith(subImageParams, images, expectImage, compareFunc):
@@ -101,12 +119,11 @@ def findSimilarestPictureWith(subImageParams, images, expectImage, compareFunc):
         if i[1]-i[2] < 0 or i[0]-i[2] < 0 or i[1]+i[2] > (images.shape)[1] or i[0]+i[2] > (images.shape)[0]:
             continue
         cropImage = images[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
+        print(i, cropImage.shape)
         cv2.imwrite("cache/"+str(count)+".jpg", cropImage)
-        cropImage = cv2.resize(cropImage, (100, 100),
-                               interpolation=cv2.INTER_CUBIC)
-        cropImage = cv2.cvtColor(cropImage, cv2.COLOR_BGR2GRAY)
+        cropImage = prepareForCompare(cropImage)
         ret = compareFunc(cropImage, expectImage)
-        if ret <= 0.35:
+        if ret <= COMPARE_THRESHOLD:
             potentialPoints.append([i[0], i[1], ret])
         count += 1
     # 移除多余的文件
