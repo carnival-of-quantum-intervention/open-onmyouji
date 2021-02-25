@@ -1,5 +1,4 @@
 import cv2
-from numpy.lib.npyio import NpzFile
 import mouse
 import picture
 import threading
@@ -7,10 +6,16 @@ import time
 import tkinter
 import window
 import cache
+import random
 
 
 def readImage(filename):
     return cache.readBy(filename, cv2.imread)
+
+
+def randomInRange(pos):
+    x = random.random()
+    return [a*x+b*(1-x) for (a, b) in zip(pos[0], pos[1])]
 
 
 def findCirclePictureIn(captured, task,  r):
@@ -70,17 +75,21 @@ class thread(threading.Thread):
         while self.__on:
             if self.__index >= 0:
                 self.stateStr.set("Working")
-                global resultStr
-                self.resultStr.set("Found"if self.execute(
-                    config[self.__index]["task"], None)else "Not found")
+                res = self.execute(
+                    config[self.__index]["task"], None)
+                print(res)
+                self.resultStr.set("Found"if res else "Not found")
 
             time.sleep(1)
 
     def execute(self, task, arg):
-        global cacheMap
+        print(task)
         HWND = self.__hwnd
         left, top, right, bottom = window.getRect(HWND)
-        windowWidth, windowHeight = right - left, top - bottom
+        windowWidth, windowHeight = right - left, bottom - top
+        if not (0 <= left < right and 0 <= top < bottom):
+            print("Window is not visible.")
+            return None
         # 读取图片
         captured = window.captureWindowAs(HWND, "cache/cache.png")
 
@@ -104,6 +113,24 @@ class thread(threading.Thread):
                     else:
                         print("Unrecognized color model",
                               task["color"]["model"])
+        elif task["type"] == "examine":
+            if "position" in task:
+                pos = task["position"]
+                assert "image" in task
+                x1 = int(pos[0][0]*windowWidth)
+                x2 = int(pos[1][0]*windowWidth)
+                y1 = int(pos[0][1]*windowHeight)
+                y2 = int(pos[1][1]*windowHeight)
+                p1 = picture.prepareForCompare(captured[x1:x2][y1:y2])
+                p2 = picture.prepareForCompare(readImage(task["image"]))
+                cv2.imshow("1", p1)
+                cv2.imshow("2", p2)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+                if picture.compareFull(p1, p2) < picture.COMPARE_THRESHOLD:
+                    res = [randomInRange(pos)]
+            else:
+                print("Specify a position in exaimine task.")
         elif task["type"] == "click":
             res = clickAt(captured, task, arg, HWND)
         elif task["type"] == "count":
