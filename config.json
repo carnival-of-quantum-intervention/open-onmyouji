@@ -50,6 +50,20 @@
           }
         }
       }
+    },
+    {
+      "name": "业原火",
+      "task": {
+        "type": "examine",
+        "image": "picture/mitama-2.png",
+        "position": [
+          [0.88, 0.83],
+          [0.92, 0.91]
+        ],
+        "then": {
+          "type": "click"
+        }
+      }
     }
   ]
 }
