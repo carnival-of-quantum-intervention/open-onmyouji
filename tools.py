@@ -40,7 +40,7 @@ def clickAt(captured, task, points, hwnd):
         else:
             point = None
     else:
-        if len(points[0] >= 2):
+        if len(points[0]) >= 2:
             point = points[0][0:2]
     if point != None:
         mouse.click(*window.getAbsolutePos(hwnd, point))
@@ -121,12 +121,13 @@ class thread(threading.Thread):
                 x2 = int(pos[1][0]*windowWidth)
                 y1 = int(pos[0][1]*windowHeight)
                 y2 = int(pos[1][1]*windowHeight)
-                p1 = picture.prepareForCompare(captured[x1:x2][y1:y2])
+                #print(windowWidth, windowHeight, x1, x2, y1, y2, pos, captured.shape)
+                p1 = picture.prepareForCompare(captured[y1:y2, x1:x2])
                 p2 = picture.prepareForCompare(readImage(task["image"]))
-                cv2.imshow("1", p1)
-                cv2.imshow("2", p2)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+                #cv2.imshow("1", p1)
+                #cv2.imshow("2", p2)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
                 if picture.compareFull(p1, p2) < picture.COMPARE_THRESHOLD:
                     res = [randomInRange(pos)]
             else:
