@@ -157,7 +157,3 @@ class thread(threading.Thread):
         if res != None and "then" in task:
             return self.execute(task["then"], res)
         return "otherwise" in task and self.execute(task["otherwise"], arg)
-
-
-global cacheMap
-cacheMap = {}
