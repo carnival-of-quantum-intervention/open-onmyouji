@@ -36,7 +36,7 @@ def clickAt(captured, task, points, hwnd):
         if "position" in task and len(task["position"]) >= 2:
             a = task["position"][0]
             b = task["position"][1]
-            point = a
+            point = randomInRange([a, b])
         else:
             point = None
     else:
@@ -80,7 +80,8 @@ class thread(threading.Thread):
                 print(res)
                 self.resultStr.set("Found"if res else "Not found")
 
-            time.sleep(1)
+            if "nosleep" not in config:
+                time.sleep(1)
 
     def execute(self, task, arg):
         print(task)
