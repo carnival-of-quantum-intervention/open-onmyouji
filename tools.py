@@ -47,6 +47,57 @@ def clickAt(captured, task, points, hwnd):
     return point
 
 
+# Basic functions below
+def locate(task: dict):
+    if "shape" in task:
+        if task["shape"] == "circle":
+            res = findCirclePictureIn(
+                captured, task, int(task["ratio"] * windowWidth))
+        else:
+            print("Unrecognized shape", task["shape"])
+    elif "color" in task:
+        if "model" in task["color"]:
+            if task["color"]["model"] == "hsv":
+                if "image" in task["color"]:
+                    res = picture.findColor(
+                        captured, readImage(task["color"]["image"]))
+            else:
+                print("Unrecognized color model",
+                      task["color"]["model"])
+
+
+def examine(task: dict):
+    if "position" in task:
+        pos = task["position"]
+        assert "image" in task
+        x1 = int(pos[0][0]*windowWidth)
+        x2 = int(pos[1][0]*windowWidth)
+        y1 = int(pos[0][1]*windowHeight)
+        y2 = int(pos[1][1]*windowHeight)
+        # print(windowWidth, windowHeight, x1,x2, y1, y2, pos, captured.shape)
+        p1 = picture.prepareForCompare(captured[y1:y2, x1:x2])
+        p2 = picture.prepareForCompare(readImage(task["image"]))
+        # cv2.imshow("1", p1)
+        # cv2.imshow("2", p2)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        if picture.compareFull(p1, p2) < picture.COMPARE_THRESHOLD:
+            res = [randomInRange(pos)]
+    else:
+        print("Specify a position in exaimine task.")
+
+
+def click(task: dict):
+    res = clickAt(captured, task, arg, HWND)
+
+
+def take(task: dict):
+    if "count" not in task:
+        res = None
+    else:
+        res = arg[0:task["count"]]
+
+
 class thread(threading.Thread):
     def __init__(self, HWND, configs, index):
         self.__index = index
@@ -80,9 +131,6 @@ class thread(threading.Thread):
                 print(res)
                 self.resultStr.set("Found"if res else "Not found")
 
-            if "nosleep" not in config:
-                time.sleep(1)
-
     def execute(self, task, arg):
         print(task)
         HWND = self.__hwnd
@@ -93,67 +141,3 @@ class thread(threading.Thread):
             return None
         # 读取图片
         captured = window.captureWindowAs(HWND, "cache/cache.png")
-
-        res = None
-        if "type"not in task:
-            print("Please specify the task type.")
-            return
-        if task["type"] == "locate":
-            if "shape" in task:
-                if task["shape"] == "circle":
-                    res = findCirclePictureIn(
-                        captured, task, int(task["ratio"] * windowWidth))
-                else:
-                    print("Unrecognized shape", task["shape"])
-            elif "color" in task:
-                if "model" in task["color"]:
-                    if task["color"]["model"] == "hsv":
-                        if "image" in task["color"]:
-                            res = picture.findColor(
-                                captured, readImage(task["color"]["image"]))
-                    else:
-                        print("Unrecognized color model",
-                              task["color"]["model"])
-        elif task["type"] == "examine":
-            if "position" in task:
-                pos = task["position"]
-                assert "image" in task
-                x1 = int(pos[0][0]*windowWidth)
-                x2 = int(pos[1][0]*windowWidth)
-                y1 = int(pos[0][1]*windowHeight)
-                y2 = int(pos[1][1]*windowHeight)
-                # print(windowWidth, windowHeight, x1,x2, y1, y2, pos, captured.shape)
-                p1 = picture.prepareForCompare(captured[y1:y2, x1:x2])
-                p2 = picture.prepareForCompare(readImage(task["image"]))
-                # cv2.imshow("1", p1)
-                # cv2.imshow("2", p2)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
-                if picture.compareFull(p1, p2) < picture.COMPARE_THRESHOLD:
-                    res = [randomInRange(pos)]
-            else:
-                print("Specify a position in exaimine task.")
-        elif task["type"] == "click":
-            res = clickAt(captured, task, arg, HWND)
-        elif task["type"] == "count":
-            if arg != None:
-                res = len(arg)
-            else:
-                res = 0
-        elif task["type"] == "take":
-            if "count" not in task:
-                res = None
-            else:
-                res = arg[0:task["count"]]
-        elif task["type"] == "compare":
-            if arg < task["value"]:
-                return ()
-            else:
-                return None
-        else:
-            print("Unrecognized type", task["type"])
-            return None
-
-        if res != None and "then" in task:
-            return self.execute(task["then"], res)
-        return "otherwise" in task and self.execute(task["otherwise"], arg)

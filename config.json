@@ -53,6 +53,7 @@
     },
     {
       "name": "业原火",
+      "nosleep": "",
       "task": {
         "type": "examine",
         "image": "picture/mitama-2.png",
@@ -65,18 +66,56 @@
         },
         "otherwise": {
           "type": "examine",
-          "image": "picture/award.png",
+          "image": "picture/continue.png",
           "position": [
-            [0.436, 0.678],
-            [0.561, 0.862]
+            [0.433, 0.936],
+            [0.565, 0.986]
           ],
-          "then": { "type": "click" }
+          "then": { "type": "click" },
+          "otherwise": {
+            "type": "examine",
+            "image": "picture/award.png",
+            "position": [
+              [0.436, 0.678],
+              [0.561, 0.862]
+            ],
+            "then": { "type": "click" }
+          }
         }
       }
     },
     {
       "name": "组队",
-      "nosleep": "",
+      "task": {
+        "type": "examine",
+        "image": "picture/team-begin.png",
+        "position": [
+          [0.916, 0.816],
+          [0.993, 0.955]
+        ],
+        "then": {
+          "type": "click"
+        },
+        "otherwise": {
+          "type": "examine",
+          "image": "picture/award.png",
+          "position": [
+            [0.436, 0.678],
+            [0.561, 0.862]
+          ],
+          "then": { "type": "click" },
+          "otherwise": {
+            "type": "click",
+            "position": [
+              [0.92, 0.82],
+              [0.99, 0.95]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "自定义",
       "task": {
         "type": "examine",
         "image": "picture/team-begin.png",
