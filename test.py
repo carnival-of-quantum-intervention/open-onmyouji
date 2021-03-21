@@ -21,7 +21,7 @@ if 0:
     cv2.destroyAllWindows()
 
 
-if 1:
+if 0:
     import numpy as np
     import picture
     import cv2
@@ -37,3 +37,40 @@ if 1:
     cv2.imshow("Processed picture", p1)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+if 1:
+    import cv2
+    import numpy as np
+    window_name = "filter2D Demo"
+
+    # Load an image
+    src = cv2.imread("picture/test/2.png")
+
+    # Create window
+    cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
+
+   # Initialize arguments for the filter
+    anchor = (-1, -1)
+    delta = 0
+    ddepth = -1
+
+    # Loop - Will filter the image with different kernel sizes each 0.5 seconds
+    ind = 0
+    while True:
+
+        c = cv2.waitKey(500)
+        # Press 'ESC' to exit the program
+        if c == 27:
+            break
+
+        # Update kernel size for a normalized box filter
+        kernel_size = 3 + 2*(ind % 5)
+        kernel = np.ones((kernel_size, kernel_size), np.float) / \
+            (kernel_size*kernel_size)
+        kernel = cv2.imread("picture/full.png")
+
+        # Apply filter
+        dst = cv2.filter2D(src, ddepth, kernel, anchor=anchor,
+                           delta=delta, borderType=cv2.BORDER_DEFAULT)
+        cv2.imshow(window_name, dst)
+        ind += 1
